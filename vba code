@@ -1,0 +1,55 @@
+Sub CreateAndEmailSheet()
+    Dim wb As Workbook
+    Dim newWb As Workbook
+    Dim ws As Worksheet
+    Dim newWs As Worksheet
+    Dim rng As Range
+    
+    ' Set the existing workbook and worksheet (10th sheet)
+    Set wb = ThisWorkbook
+    Set ws = wb.Sheets(10)
+    
+    ' Define the range to copy (A1:B3 based on the image)
+    Set rng = ws.Range("A1:B3")
+    
+    ' Create a new workbook and copy the range into it
+    Set newWb = Workbooks.Add
+    Set newWs = newWb.Sheets(1)
+    rng.Copy newWs.Range("A1")
+    
+    ' Save the new workbook temporarily
+    Dim tempFilePath As String
+    tempFilePath = Environ("TEMP") & "\tempWorkbook.xlsx"
+    newWb.SaveAs tempFilePath
+    
+    ' Send the new workbook as an email attachment
+    Dim OutlookApp As Object
+    Dim OutlookMail As Object
+    
+    Set OutlookApp = CreateObject("Outlook.Application")
+    Set OutlookMail = OutlookApp.CreateItem(0)
+    
+    With OutlookMail
+        .To = "recipient@example.com"
+        .Subject = "New Workbook"
+        .Body = "Please find the attached workbook."
+        .Attachments.Add tempFilePath
+        .Send
+    End With
+    
+    ' Close the new workbook without saving
+    newWb.Close SaveChanges:=False
+    
+    ' Delete the temporary file
+    Kill tempFilePath
+    
+    ' Clean up
+    Set newWs = Nothing
+    Set newWb = Nothing
+    Set ws = Nothing
+    Set wb = Nothing
+    Set OutlookMail = Nothing
+    Set OutlookApp = Nothing
+    
+    MsgBox "Email sent successfully."
+End Sub
