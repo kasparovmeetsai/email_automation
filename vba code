@@ -15,7 +15,8 @@ Sub CreateAndEmailSheet()
     ' Create a new workbook and copy the range into it
     Set newWb = Workbooks.Add
     Set newWs = newWb.Sheets(1)
-    rng.Copy newWs.Range("A1")
+    rng.Copy
+    newWs.Range("A1").PasteSpecial Paste:=xlPasteValues
     
     ' Save the new workbook temporarily
     Dim tempFilePath As String
