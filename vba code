@@ -64,40 +64,49 @@ Sub UpdateValues()
     Dim ws As Worksheet
     Set ws = ThisWorkbook.Sheets("Sheet1")
 
+    ' Define existing ranges
+    Dim existingRanges As Variant
+    existingRanges = Array(ws.Range("B1:D7"), ws.Range("B13:D17"))
+    
+    ' Define new ranges
+    Dim newRanges As Variant
+    newRanges = Array(ws.Range("B8:D12"), ws.Range("B18:D25"))
+
     Dim rngExisting As Range
-    Set rngExisting = ws.Range("B1:D7")
-
     Dim rngNew As Range
-    Set rngNew = ws.Range("B8:D12")
-
     Dim cell As Range
     Dim cellNew As Range
     Dim matchFound As Boolean
 
-    For Each cellNew In rngNew.Rows
-        matchFound = False
+    ' Loop through each pair of existing and new ranges
+    For i = LBound(existingRanges) To UBound(existingRanges)
+        Set rngExisting = existingRanges(i)
+        Set rngNew = newRanges(i)
 
-        For Each cell In rngExisting.Rows
-            If cell.Cells(1, 1).Value = cellNew.Cells(1, 1).Value And _
-               cell.Cells(1, 2).Value = cellNew.Cells(1, 2).Value Then
-                cell.Cells(1, 3).Value = cell.Cells(1, 3).Value + cellNew.Cells(1, 3).Value
-                matchFound = True
-                Exit For
-            End If
-        Next cell
+        For Each cellNew In rngNew.Rows
+            matchFound = False
 
-        If Not matchFound Then
-            ' Find the first empty row in the existing range
             For Each cell In rngExisting.Rows
-                If IsEmpty(cell.Cells(1, 1).Value) And IsEmpty(cell.Cells(1, 2).Value) Then
-                    cell.Cells(1, 1).Value = cellNew.Cells(1, 1).Value
-                    cell.Cells(1, 2).Value = cellNew.Cells(1, 2).Value
-                    cell.Cells(1, 3).Value = cellNew.Cells(1, 3).Value
+                If cell.Cells(1, 1).Value = cellNew.Cells(1, 1).Value And _
+                   cell.Cells(1, 2).Value = cellNew.Cells(1, 2).Value Then
+                    cell.Cells(1, 3).Value = cell.Cells(1, 3).Value + cellNew.Cells(1, 3).Value
+                    matchFound = True
                     Exit For
                 End If
             Next cell
-        End If
-    Next cellNew
-End Sub
 
+            If Not matchFound Then
+                ' Find the first completely empty row in the existing range
+                For Each cell In rngExisting.Rows
+                    If IsEmpty(cell.Cells(1, 1).Value) And IsEmpty(cell.Cells(1, 2).Value) And IsEmpty(cell.Cells(1, 3).Value) Then
+                        cell.Cells(1, 1).Value = cellNew.Cells(1, 1).Value
+                        cell.Cells(1, 2).Value = cellNew.Cells(1, 2).Value
+                        cell.Cells(1, 3).Value = cellNew.Cells(1, 3).Value
+                        Exit For
+                    End If
+                Next cell
+            End If
+        Next cellNew
+    Next i
+End Sub
 
