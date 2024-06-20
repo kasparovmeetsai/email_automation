@@ -110,3 +110,34 @@ Sub UpdateValues()
     Next i
 End Sub
 
+
+
+
+
+from exchangelib import DELEGATE, Account, Credentials, Configuration
+import pandas as pd
+
+# Define credentials and account details
+credentials = Credentials('your-email@example.com', 'your-password')
+config = Configuration(server='your-exchange-server.com', credentials=credentials)
+account = Account('your-email@example.com', credentials=credentials, autodiscover=False, config=config, access_type=DELEGATE)
+
+# Create a list to store email details
+email_data = []
+
+for item in account.inbox.all().order_by('-datetime_received')[:100]:  # Fetch the latest 100 emails
+    email_data.append({
+        "Date": item.datetime_received,
+        "From": item.sender.email_address,
+        "Subject": item.subject
+    })
+
+# Convert email data to a DataFrame
+df = pd.DataFrame(email_data)
+
+# Save DataFrame to an Excel file
+output_file_path = "/path/to/your/destination/email_data.xlsx"
+df.to_excel(output_file_path, index=False)
+
+print(f"Excel file saved to {output_file_path}")
+
