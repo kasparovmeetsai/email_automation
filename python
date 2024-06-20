@@ -38,3 +38,48 @@ print(f"Excel file saved to {output_file_path}")
 
 # Logout from the email server
 server.logout()
+
+
+from O365 import Account
+import pandas as pd
+
+# Replace with your client_id and client_secret
+client_id = 'your-client-id'
+client_secret = 'your-client-secret'
+
+# Authenticate
+credentials = (client_id, client_secret)
+account = Account(credentials)
+
+if not account.is_authenticated:  # will check if there is a token and has not expired
+    # Authenticate the account if not already authenticated
+    account.authenticate(scopes=['basic', 'message_all'])
+
+# Get the mailbox
+mailbox = account.mailbox()
+
+# Get the inbox
+inbox = mailbox.inbox_folder()
+
+# Fetch the emails
+emails = inbox.get_messages(limit=100)  # Fetch the latest 100 emails
+
+# Create a list to store email details
+email_data = []
+
+for message in emails:
+    email_data.append({
+        "Date": message.received.strftime("%Y-%m-%d %H:%M:%S"),
+        "From": message.sender.address,
+        "Subject": message.subject
+    })
+
+# Convert email data to a DataFrame
+df = pd.DataFrame(email_data)
+
+# Save DataFrame to an Excel file
+output_file_path = "/path/to/your/destination/email_data.xlsx"
+df.to_excel(output_file_path, index=False)
+
+print(f"Excel file saved to {output_file_path}")
+
