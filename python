@@ -1,0 +1,40 @@
+import imapclient
+import pyzmail
+import pandas as pd
+
+# Connect to the email server
+server = imapclient.IMAPClient('imap.your-email-provider.com', ssl=True)
+server.login('your-email@example.com', 'your-password')
+
+# Select the mailbox you want to read from
+server.select_folder('INBOX', readonly=True)
+
+# Search for all emails
+messages = server.search('ALL')
+
+# Create a list to store email details
+email_data = []
+
+for msgid, data in server.fetch(messages, ['ENVELOPE']).items():
+    envelope = data[b'ENVELOPE']
+    subject = envelope.subject.decode()
+    from_ = envelope.from_[0].mailbox.decode() + '@' + envelope.from_[0].host.decode()
+    date_ = envelope.date.isoformat()
+
+    email_data.append({
+        "Date": date_,
+        "From": from_,
+        "Subject": subject
+    })
+
+# Convert email data to a DataFrame
+df = pd.DataFrame(email_data)
+
+# Save DataFrame to an Excel file
+output_file_path = "/path/to/your/destination/email_data.xlsx"
+df.to_excel(output_file_path, index=False)
+
+print(f"Excel file saved to {output_file_path}")
+
+# Logout from the email server
+server.logout()
